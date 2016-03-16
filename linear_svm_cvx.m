@@ -29,15 +29,6 @@ function [x, y, w, b, alpha1] = linear_svm_cvx(train_file, C)
             alpha1 >= 0;
             alpha1 <= C;
     cvx_end
-%     cvx_begin
-%         variable alpha1(m,1)   %alpha : m sized column vector
-%         dual variables d1 d2 d3
-%         minimize ( -alpha1'*q*alpha1 - b*alpha1 );   % c = 0
-%         subject to    %constraints on alpha
-%             d1 : y'*alpha1 == 0;
-%             d2 : alpha1 >= 0;
-%             d3 : alpha1 <= 1;      %C = 1
-%     cvx_end
     save('alpha.txt','alpha1','-ascii');
     w = zeros(n,1);
     for index0 = 1:m

@@ -24,15 +24,15 @@ function [ x, y, alpha1 ] = gaussian_svm_cvx( train_file, C, bw )
 %         end
 %     end
     b = ones(1,m);
-%     alpha1 = load('alpha.txt','-ascii');
-    cvx_begin
-        variable alpha1(m);
-        maximize(alpha1'*q*alpha1 + b*alpha1);
-        subject to
-            alpha1'*y == 0;
-            alpha1 >= 0;
-            alpha1 <= C;
-    cvx_end
+    alpha1 = load('alpha_gauss.txt','-ascii');
+%     cvx_begin
+%         variable alpha1(m);
+%         minimize(-alpha1'*q*alpha1 - b*alpha1);
+%         subject to
+%             alpha1'*y == 0;
+%             alpha1 >= 0;
+%             alpha1 <= C;
+%     cvx_end
     save('alpha_gauss.txt','alpha1','-ascii');
 
 end

@@ -16,12 +16,20 @@ function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_fil
     b_0 = -realmax;
     b_1 = realmax;
     m_train = size(x_train,1);
-    wtx_train = alpha1.*y_train.*
+    xitxi = sum(x_train.^2,2);
+    gauss_k = bsxfun(@plus, xitxi',xitxi);
+    gauss_k = bsxfun(@minus,gauss_k,2*(x_train*x_train'));
+    gauss_k = exp(-gauss_k*bw);
+    wtx_train = ((alpha1.*y_train)')*gauss_k;
     for index0 = 1:m_train
-        wtx = 0;
-        for index1 = 1:m_train
-            wtx = wtx + alpha1(index1)*y_train(index1)*exp(-((norm(x_train(index1,:)-x_train(index0,:)))^2)*bw);
-        end
+    	if(alpha1(index0) < 10^-4 || alpha1(index0) > 0.9999)
+    		disp(alpha1(index0));
+    		continue;
+    	end
+        wtx = wtx_train(index0);
+%         for index1 = 1:m_train
+%             wtx = wtx + alpha1(index1)*y_train(index1)*exp(-((norm(x_train(index1,:)-x_train(index0,:)))^2)*bw);
+%         end
         if(y_train(index0) == -1)
             b_0 = max(b_0,wtx);
         else
@@ -32,11 +40,19 @@ function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_fil
     disp(b_1);
     b = -0.5*(max(b_0) + min(b_1));
     acc = 0;
+    xitxi = sum(x_train.^2,2);
+    xtx = sum(x_test.^2,2);
+    gauss_k = bsxfun(@plus, xtx',xitxi);
+    gauss_k = bsxfun(@minus,gauss_k,2*(x_train*x_test'));
+%     gauss_k = bsxfun(@minus,gauss_k,2*(x_test*x_train'));
+    gauss_k = exp(-gauss_k*bw);
+    wtx_test = ((alpha1.*y_train)')*gauss_k;
     for index0 = 1:m_test
-        wtx = 0;
-        for index1 = 1:m_train
-            wtx = wtx + alpha1(index1)*y_train(index1)*exp(-((norm(x_train(index1,:)-x_test(index0,:)))^2)*bw);
-        end
+        wtx = wtx_test(index0);
+%         wtx = 0;
+%         for index1 = 1:m_train
+%             wtx = wtx + alpha1(index1)*y_train(index1)*exp(-((norm(x_train(index1,:)-x_test(index0,:)))^2)*bw);
+%         end
         if (wtx + b > 0)
             result = 1;
         else
