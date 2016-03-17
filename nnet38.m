@@ -1,12 +1,14 @@
-function theta = nnet38( data_file)
+function [x, y, theta_in, theta_hid] = nnet38( data_file)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-    data38 = load(data_file,'train3','train8');
-    data3 = data38.train3;
-    data8 = data38.train8;
-    save('mnist_bin38.mat','data3','data8');
-    x_old = [data3; data8];
-    y_old = [ones(size(data3,1),1); zeros(size(data8,1),1)];
+    data = load(data_file);
+    train3 = data.train3;
+    train8 = data.train8;
+    test3 = data.test3;
+    test8 = data.test8;
+    save('mnist_bin38.mat','train3','train8','test3','test8');
+    x_old = [train3; train8];
+    y_old = [ones(size(train3,1),1); zeros(size(train8,1),1)];
     rand_ind_vec = randperm(size(x_old,1));
     x = zeros(size(x_old,1),784);
     y = zeros(size(x,1),1);
@@ -18,9 +20,10 @@ function theta = nnet38( data_file)
     disp(size(x,1));
     disp(size(x_old,1));
     x = [ones(size(x,1),1) x];  %add bias term
-    theta_in = 0.001*(rand(785,100) - 0.5);
-    theta_hid = 0.001*(rand(100,1) - 0.5);
+    theta_in = 0.05*(rand(785,100) - 0.5);
+    theta_hid = 0.05*(rand(100,1) - 0.5);
     iteration = 1;
+    error_prev = 0;
     while (true)
         l_rate = 1/sqrt(iteration);
         for index0 = 1:size(x,1)
@@ -47,10 +50,16 @@ function theta = nnet38( data_file)
         error = error/(2*size(x,1));
         disp('error:');
         disp(error);
-        if(error < 10^-4)
+        disp('diff:');
+        disp(error-error_prev);
+        if((iteration > 2) && (abs(error - error_prev) < 10^-5))
             break;
         end
+        error_prev = error;
         iteration = iteration+1;
     end
+    save('theta_in_38.txt','theta_in','-ascii');
+    save('theta_hid_38.txt','theta_hid','-ascii');
+    save('iterations38.txt','iteration','-ascii');
 end
 

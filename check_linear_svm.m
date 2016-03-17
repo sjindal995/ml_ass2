@@ -1,4 +1,4 @@
-function lin_acc = check_linear_svm(w, b, test_file)
+function [w, b, lin_acc, nsv] = check_linear_svm(x_train, y_train, alpha1, test_file)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
     test_file_str = fileread(test_file);
@@ -13,6 +13,28 @@ function lin_acc = check_linear_svm(w, b, test_file)
     y_test = x_test(:,n_test);
     x_test = x_test(:,1:n_test-1);
     n_test = n_test-1;
+    w = zeros(size(x_train,2),1);
+    sv = [];
+    nsv = 0;
+    for index0 = 1:size(x_train,1)
+        w = w + alpha1(index0)*y_train(index0)*(x_train(index0,:)');
+    end
+    b_0 = -realmax;
+    b_1 = realmax;
+    for index0 = 1:size(x_train,1)
+        if((alpha1(index0)< 10^-4) || (alpha1(index0) > 0.9999))
+%             disp(alpha1(index0));
+            continue;
+        end
+            sv = [sv; x_train(index0,:)];
+            nsv = nsv + 1;
+            if(y_train(index0) == -1)
+                b_0 = max(b_0,(x_train(index0,:)*w));
+            else
+                b_1 = min(b_1,(x_train(index0,:)*w));
+            end
+    end
+    b = -0.5*(b_0 + b_1);
     acc = 0;
     approx = 0;
     for index0 = 1:m_test
@@ -28,5 +50,8 @@ function lin_acc = check_linear_svm(w, b, test_file)
         end
     end
     lin_acc = acc/m_test;
+    save('sv_lin.txt','sv','-ascii');
+    save('w_lin.txt','w','-ascii');
+    save('b_lin.txt','b','-ascii');
 end
 

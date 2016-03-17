@@ -1,4 +1,4 @@
-function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_file, bw)
+function [b,gauss_acc, nsv] = check_gaussian_svm( x_train, y_train, alpha1,  test_file, bw)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
     test_file_str = fileread(test_file);
@@ -21,11 +21,15 @@ function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_fil
     gauss_k = bsxfun(@minus,gauss_k,2*(x_train*x_train'));
     gauss_k = exp(-gauss_k*bw);
     wtx_train = ((alpha1.*y_train)')*gauss_k;
+    sv = [];
+    nsv = 0;
     for index0 = 1:m_train
     	if(alpha1(index0) < 10^-4 || alpha1(index0) > 0.9999)
-    		disp(alpha1(index0));
+%     		disp(alpha1(index0));
     		continue;
-    	end
+        end
+        sv = [sv; x_train(index0,:)];
+        nsv = nsv + 1;
         wtx = wtx_train(index0);
 %         for index1 = 1:m_train
 %             wtx = wtx + alpha1(index1)*y_train(index1)*exp(-((norm(x_train(index1,:)-x_train(index0,:)))^2)*bw);
@@ -36,8 +40,8 @@ function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_fil
             b_1 = min(b_1,wtx);
         end
     end
-    disp(b_0);
-    disp(b_1);
+%     disp(b_0);
+%     disp(b_1);
     b = -0.5*(max(b_0) + min(b_1));
     acc = 0;
     xitxi = sum(x_train.^2,2);
@@ -63,5 +67,6 @@ function [b,gauss_acc] = check_gaussian_svm( x_train, y_train, alpha1,  test_fil
         end
     end
     gauss_acc = acc/m_test;
+    save('sv_gauss.txt','sv','-ascii');
 end
 

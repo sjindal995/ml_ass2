@@ -1,4 +1,4 @@
-function theta = nnet( data_file )
+function [theta_in0, theta_hid0] = nnet( data_file )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     data = load(data_file);
@@ -43,9 +43,10 @@ function theta = nnet( data_file )
 %     end
     x = double(x)/255;
     x = [ones(size(x,1),1) x];  %add bias term
-    theta_in = 0.001*(rand(785,100) - 0.5);
-    theta_hid = 0.001*(rand(100,10) - 0.5);
+    theta_in = 0.05*(rand(785,100) - 0.5);
+    theta_hid = 0.05*(rand(100,10) - 0.5);
     iteration = 1;
+    error_prev = 0;
     while (true)
         l_rate = 1/sqrt(iteration);
         for index1 = 1:size(x,1)
@@ -73,10 +74,17 @@ function theta = nnet( data_file )
         error = error/(2*size(x,1));
         disp('error:');
         disp(error);
-        if(error < 10^-4)
+        disp('diff;');
+        disp(error-error_prev);
+        if(iteration > 2 && (abs(error-error_prev) < 10^-4))
             break;
         end
+        error_prev = error;
         iteration = iteration+1;
     end
+    save('theta_in.txt','theta_in','-ascii');
+    save('theta_hid.txt','theta_hid','-ascii');
+    theta_in0 = theta_in;
+    theta_hid0 = theta_hid;
 end
 
